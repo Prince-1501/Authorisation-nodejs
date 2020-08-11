@@ -1,20 +1,27 @@
 const express = require('express');
-const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
-//mongoose
-mongoose.connect('mongodb://localhost/test',{useNewUrlParser: true, useUnifiedTopology : true})
-.then(() => console.log('connected'))
-.catch((err)=> console.log(err));
+require("dotenv").config();
 
-//BodyParser
+const app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 //Routes
-app.use('/',require('./routes/user'));
+const userRoute = require('./routes/user');
 
-app.listen(5000, ()=>{
-  console.log(`Your server is up on port 5000`);
-})
+app.use('/', userRoute);
+
+const PORT = process.env.PORT || 3000;
+const DBURL = process.env.DBURL;
+mongoose
+  .connect(DBURL, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false })
+  .then((result) => {
+    app.listen(PORT, () => { console.log(`Application is running on port ${PORT}`);
+  });
+  })
+  .catch((error) => {console.log(error);
+  });

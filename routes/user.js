@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 var verifyToken = require('./../verifyToken');
 
+require("dotenv").config();
+
 //login handle
 router.post('/login', async(req, res)=>{
   const { email, password } = req.body;
@@ -14,7 +16,7 @@ router.post('/login', async(req, res)=>{
   const isMatch = await bcrypt.compare(password, user.password);
   if(!isMatch) return res.status(401).send({ auth: false, token: null });
 
-  var token = jwt.sign({id: user._id}, "randomString", {expiresIn: 86400});
+  var token = jwt.sign({id: user._id}, process.env.SECRET_KEY , {expiresIn: 86400});
   res.status(200).send({auth: true, token})
 
 });
@@ -57,7 +59,8 @@ router.post('/register', async (req, res)=>{
 
       jwt.sign(
         {id : newUser._id},
-        "randomString",{
+        process.env.SECRET_KEY,
+        {
            expiresIn: 86400 // expires in 24 hours
         },
         (err, token)=>{
@@ -93,7 +96,5 @@ router.get('/me', verifyToken, (req, res, next)=>{
     })
 
 })
-
-
 
 module.exports = router;
